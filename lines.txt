@@ -1,0 +1,68 @@
+.line_1,
+.line_2,
+.line_3 {
+  width: 0;
+  height: 5px;
+}
+/* Win State */
+.line_1.win,
+.line_2.win,
+.line_3.win {
+  width: 90%;
+}
+.line_1 {
+  top: 60px;
+}
+.line_2 {
+  top: 217.5px;
+}
+.line_3 {
+  bottom: 175px;
+}
+/* ========= */
+.line_4,
+.line_5,
+.line_6 {
+  height: 73%;
+  width: 5px;
+  top: 18px;
+}
+/* Win State */
+.line_4.win,
+.line_5.win,
+.line_6.win {
+  height: 73%;
+}
+.line_4 {
+  left: 62.5px;
+}
+.line_5 {
+  left: 217.5px;
+}
+.line_6 {
+  left: 372.5px;
+}
+/* ========= */
+.line_7,
+.line_8 {
+  top: 40%;
+  width: 5px;
+  height: 75%;
+}
+/* Active State */
+.line_7 {
+  transform: rotate(45deg) translateY(-50%);
+  -webkit-transform: rotate(45deg) translateY(-50%);
+  -moz-transform: rotate(45deg) translateY(-50%);
+  -ms-transform: rotate(45deg) translateY(-50%);
+  -o-transform: rotate(45deg) translateY(-50%);
+  left: -45px;
+}
+.line_8 {
+  transform: rotate(-45deg) translateY(-50%);
+  -webkit-transform: rotate(-45deg) translateY(-50%);
+  -moz-transform: rotate(-45deg) translateY(-50%);
+  -ms-transform: rotate(-45deg) translateY(-50%);
+  -o-transform: rotate(-45deg) translateY(-50%);
+  left: -45px;
+}

@@ -541,3 +541,30 @@ body {
     border-width: 20px;
   }
 }
+
+/* Cancel.html */
+
+.cancel {
+  min-height: 100vh;
+  background-color: var(--firstColor);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+.cancel img {
+  position: absolute;
+  width: 100%;
+  z-index: -1;
+  filter: blur(2.5px);
+  -webkit-filter: blur(2.5px);
+}
+.cancel h1 {
+  width: 77%;
+  line-height: 2;
+  font-size: 50px;
+  text-align: center;
+  color: white;
+  text-shadow: 0 0 10px #000;
+}

@@ -145,6 +145,8 @@ function placeMark() {
 }
 //* Game Function
 function mainFunction() {
+  window.console.clear();
+
   choice.classList.remove("show");
   squares.forEach((square) => {
     square.addEventListener("click", placeMark);
@@ -205,11 +207,22 @@ function setScores() {
 }
 //* Start Game Function
 function startGameFunction() {
-  if (player1NameInput.value.length > 0 && player2NameInput.value.length > 0) {
+  const onlyLetters = new RegExp("^[a-zA-Z ]+$");
+  const namesInputs = [player1NameInput, player2NameInput];
+  //Check if the names are valid
+  if (namesInputs.every((name) => onlyLetters.test(name.value))) {
     startGame.classList.remove("show");
     choice.classList.add("show");
     player1.name = player1NameInput.value;
     player2.name = player2NameInput.value;
+  } else if (
+    window.confirm("Only Letters Are Allowed As Names.Please Try Again")
+  ) {
+    namesInputs
+      .filter((name) => !onlyLetters.test(name.value))
+      .forEach((input) => (input.value = ""));
+  } else {
+    window.open("file:///W:/JavaScript/XO/cancel.html");
   }
 }
 //* Choose Marks Function
@@ -223,7 +236,6 @@ function choose() {
   mainFunction();
 }
 //! ----------- Events -----------
-
 //* Start
 //Move to the choice modal after clicking start button
 startGameBtn.addEventListener("click", startGameFunction);

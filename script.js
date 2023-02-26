@@ -4,6 +4,7 @@ const c = console.log;
 //Game mode
 const gameMode = document.querySelector(".game_mode");
 const chooseModeBtn = document.querySelector(".choose_mode");
+const currentModeField = document.querySelector(".current_mode");
 //Squares
 const squares = document.querySelectorAll(".square");
 //Start Game
@@ -51,6 +52,11 @@ let winnerPlayer;
 let alreadyClicked = [];
 // line in the win case
 let line;
+//Random square for cpu mode
+let randomSquare;
+//To control when the automatic placement work
+let shouldContinue = true;
+
 //Get every individual square
 const square1 = document.querySelector(".one");
 const square2 = document.querySelector(".two");
@@ -92,9 +98,8 @@ const player1 = {
 const player2 = {
   score: 0,
 };
-
 //! ----------- Functions -----------
-//* Choose mode
+//* Choose mode Functions
 //To check if the second input exist or not
 const secondInputParent = document.querySelector(".cpu_case").closest(".start");
 const secondInput = document.querySelector(".cpu_case");
@@ -104,22 +109,40 @@ function chooseMode() {
     ".game_mode .mode div:has(input:checked)"
   );
   if (checked.className == "single") {
-    document.body.classList.remove("initial");
-    player1NameInput.focus();
-    gameMode.classList.remove("show");
-    startGame.classList.add("show");
-    //remove secondInput
-    secondInputParent.firstElementChild.removeChild(secondInput);
-    secondInputExistence = secondInputParent.querySelector(".cpu_case");
-    c(secondInputExistence);
+    shouldContinue = true;
+    chosenMode("single");
     startGame.querySelector(" .names > :first-child label").innerHTML =
       "Enter Your Name";
+    //Set the opposite mode in the switch button based on the selected one
   } else if (checked.className == "multi") {
-    document.body.classList.remove("initial");
-    gameMode.classList.remove("show");
-    startGame.classList.add("show");
-    player1NameInput.focus();
+    chosenMode("multi");
   }
+}
+function chosenMode(mode) {
+  //Remove the class that fixes the body's height
+  document.body.classList.remove("initial");
+  gameMode.classList.remove("show");
+  startGame.classList.add("show");
+  //remove secondInput & check for it's existence and update the first one based on the mode
+  player1NameInput.focus();
+  mode == "single"
+    ? secondInputParent.firstElementChild.removeChild(secondInput)
+    : secondInputParent.firstElementChild.appendChild(secondInput);
+  secondInputExistence = secondInputParent.querySelector(".cpu_case");
+  c(secondInputExistence);
+  c(single.checked);
+  c(multi.checked);
+  //Set the opposite mode in the switch button based on the selected one
+  currentModeField.innerHTML = "";
+  mode == "single"
+    ? currentModeField.insertAdjacentHTML(
+        "afterbegin",
+        "&nbsp; Multi PLayer <i class='fa-solid fa-user-group'></i>"
+      )
+    : currentModeField.insertAdjacentHTML(
+        "afterbegin",
+        "&nbsp; Single PLayer <i class='fa-solid fa-microchip'></i>"
+      );
 }
 //* Placing Marks Function
 function placeMark() {
@@ -136,6 +159,11 @@ function placeMark() {
   player_1.classList.toggle("player_active");
   player_2.classList.toggle("player_active");
   //To Check if all the squares are full
+  if (player2.name == "Computer") {
+    if (player_2.classList.contains("player_active")) {
+      setTimeout(switchToCPU, 700);
+    }
+  }
   number++;
   if (number === 9) {
     winMsg.classList.add("show");
@@ -151,6 +179,7 @@ function placeMark() {
         e.firstElementChild.classList.contains(currentMark)
       )
     ) {
+      if (player2.name == "Computer") shouldContinue = false;
       line = possibility[0];
       line.classList.add("win");
       line.style.opacity = "1";
@@ -169,6 +198,7 @@ function placeMark() {
     }
   }
 }
+
 //* Game Function
 function mainFunction() {
   choice.classList.remove("show");
@@ -197,15 +227,13 @@ function mainFunction() {
 function reset() {
   //Reset active player class to the first player
   activePlayer = 0;
-  player_1.classList.toggle("player_active");
-  player_2.classList.toggle("player_active");
+  player_1.classList.add("player_active");
+  player_2.classList.remove("player_active");
   //Reset scores and rounds number
-  currentRound = 0;
+  currentRound = 1;
   player1.score = player2.score = 0;
-  player1ScoreField.textContent =
-    player2ScoreField.textContent =
-    roundNumber.textContent =
-      0;
+  player1ScoreField.textContent = player2ScoreField.textContent = 0;
+  roundNumber.textContent = currentRound;
   //reset the number to Check if the game ended
   number = 0;
   //Restore the event on the elements and remove marks
@@ -256,7 +284,6 @@ function startGameFunction() {
     window.open("file:///W:/JavaScript/XO/cancel.html");
   }
 }
-
 //* Choose Marks Function
 function choose() {
   const checked = choice.querySelector(".choices div:has(input:checked)");
@@ -266,6 +293,36 @@ function choose() {
   player_1.classList.add("player_active");
   mainFunction();
 }
+//* Single Mode (CPU)
+function switchToCPU() {
+  if (!shouldContinue || number == 9) return;
+  const ev = new Event("click");
+  do {
+    randomSquare = squares[Math.floor(Math.random() * squares.length)];
+  } while (
+    randomSquare.firstElementChild.classList.contains("x") ||
+    randomSquare.firstElementChild.classList.contains("o")
+  );
+
+  randomSquare.dispatchEvent(ev);
+}
+//* Switch Modes
+function switchMode() {
+  if (single.checked) {
+    multi.checked = true;
+    chosenMode("multi");
+  } else if (multi.checked) {
+    single.checked = true;
+    shouldContinue = true;
+    chosenMode("single");
+  }
+  reset();
+  player1NameInput.value = player2NameInput.value = "";
+  xMark.checked = oMark.checked = false;
+  finalWinnerMsg.classList.remove("show");
+  startGame.classList.add("show");
+}
+
 //! ----------- Events -----------
 //* Choose mode
 chooseModeBtn.addEventListener("click", chooseMode);
@@ -314,10 +371,17 @@ document.addEventListener("keydown", (e) => {
       choose();
     }
 });
-
 //* Winning
 winMsg.addEventListener("click", (e) => {
   if (e.target.classList.contains("next_round")) {
+    //Restart CPU Function
+    if (player2.name == "Computer") {
+      shouldContinue = true;
+      if (player_2.classList.contains("player_active")) {
+        setTimeout(switchToCPU, 700);
+      }
+    }
+
     //Increment the round number and set it
     currentRound++;
     roundNumber.textContent = +currentRound;
@@ -347,14 +411,8 @@ newGameBtn.addEventListener("click", () => {
   finalWinnerMsg.classList.remove("show");
   reset();
   mainFunction();
+  shouldContinue = true;
 });
 
-function switchToCPU() {
-  const ev = new Event("click");
-  //get a random square
-  const randomSquare = squares[Math.floor(Math.random() * squares.length)];
-  squares.forEach((square) => {
-    square.addEventListener("click", placeMark);
-  });
-  randomSquare.dispatchEvent(ev);
-}
+//* Switch Mode
+currentModeField.parentElement.addEventListener("click", switchMode);

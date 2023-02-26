@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="style.css" />
     <script defer src="script.js"></script>
   </head>
-  <body>
+  <body class="initial">
     <div class="player player_1">
       <div>
         <h2 class="player1_name">PLayer 1</h2>
@@ -86,7 +86,7 @@
           <label for="player1">Player1's Name</label>
           <input type="text" id="player1" />
         </div>
-        <div>
+        <div class="cpu_case">
           <label for="player2">Player2's Name</label>
           <input type="text" id="player2" />
         </div>
@@ -133,6 +133,22 @@
         <button class="yes">Yes</button>
         <button class="no">No</button>
       </div>
+    </div>
+    <div class="game_mode show">
+      <h2>Choose Game Mode</h2>
+      <div class="mode">
+        <div class="single">
+          <input type="radio" name="mode" />
+          <i class="fa-solid fa-microchip"></i>
+          <p>Single Player</p>
+        </div>
+        <div class="multi">
+          <input type="radio" name="mode" />
+          <i class="fa-solid fa-user-group"></i>
+          <p>Multi Player</p>
+        </div>
+      </div>
+      <button class="choose_mode">Choose</button>
     </div>
     <script src="all.min.js"></script>
   </body>

@@ -1,6 +1,10 @@
 "use strict";
 const c = console.log;
 //! ----------- Selectors -----------
+//Game mode
+const gameMode = document.querySelector(".game_mode");
+const chooseModeBtn = document.querySelector(".choose_mode");
+//Squares
 const squares = document.querySelectorAll(".square");
 //Start Game
 const startGame = document.querySelector(".start ");
@@ -88,13 +92,35 @@ const player1 = {
 const player2 = {
   score: 0,
 };
-//! ----------- Functions -----------
-//* Display Start Game Modal
-setTimeout(() => {
-  startGame.classList.add("show");
-  player1NameInput.focus();
-}, 1000);
 
+//! ----------- Functions -----------
+//* Choose mode
+//To check if the second input exist or not
+const secondInputParent = document.querySelector(".cpu_case").closest(".start");
+const secondInput = document.querySelector(".cpu_case");
+let secondInputExistence = secondInputParent.querySelector(".cpu_case");
+function chooseMode() {
+  const checked = gameMode.querySelector(
+    ".game_mode .mode div:has(input:checked)"
+  );
+  if (checked.className == "single") {
+    document.body.classList.remove("initial");
+    player1NameInput.focus();
+    gameMode.classList.remove("show");
+    startGame.classList.add("show");
+    //remove secondInput
+    secondInputParent.firstElementChild.removeChild(secondInput);
+    secondInputExistence = secondInputParent.querySelector(".cpu_case");
+    c(secondInputExistence);
+    startGame.querySelector(" .names > :first-child label").innerHTML =
+      "Enter Your Name";
+  } else if (checked.className == "multi") {
+    document.body.classList.remove("initial");
+    gameMode.classList.remove("show");
+    startGame.classList.add("show");
+    player1NameInput.focus();
+  }
+}
 //* Placing Marks Function
 function placeMark() {
   if (activePlayer == 0) currentMark = player1.mark;
@@ -145,8 +171,6 @@ function placeMark() {
 }
 //* Game Function
 function mainFunction() {
-  window.console.clear();
-
   choice.classList.remove("show");
   squares.forEach((square) => {
     square.addEventListener("click", placeMark);
@@ -208,39 +232,60 @@ function setScores() {
 //* Start Game Function
 function startGameFunction() {
   const onlyLetters = new RegExp("^[a-zA-Z ]+$");
-  const namesInputs = [player1NameInput, player2NameInput];
+  //To check if there is one name input field (single)
+  let namesInputs = secondInputExistence
+    ? [player1NameInput, player2NameInput]
+    : [player1NameInput];
   //Check if the names are valid
   if (namesInputs.every((name) => onlyLetters.test(name.value))) {
     startGame.classList.remove("show");
     choice.classList.add("show");
     player1.name = player1NameInput.value;
-    player2.name = player2NameInput.value;
+    player2.name = secondInputExistence ? player2NameInput.value : "Computer";
   } else if (
     window.confirm("Only Letters Are Allowed As Names.Please Try Again")
   ) {
-    namesInputs
-      .filter((name) => !onlyLetters.test(name.value))
-      .forEach((input) => (input.value = ""));
+    const invalidNames = namesInputs.filter(
+      (name) => !onlyLetters.test(name.value)
+    );
+    invalidNames.forEach((input) => {
+      input.value = "";
+      invalidNames[0].focus();
+    });
   } else {
     window.open("file:///W:/JavaScript/XO/cancel.html");
   }
 }
+
 //* Choose Marks Function
 function choose() {
   const checked = choice.querySelector(".choices div:has(input:checked)");
   checked.dataset.mark == "x"
     ? ((player1.mark = "x"), (player2.mark = "o"))
     : ((player1.mark = "o"), (player2.mark = "x"));
-  currentMark = Number(checked.dataset.mark);
   player_1.classList.add("player_active");
   mainFunction();
 }
 //! ----------- Events -----------
+//* Choose mode
+chooseModeBtn.addEventListener("click", chooseMode);
+//Choose using keyboard
+const single = document.querySelectorAll("input[name='mode']")[0];
+const multi = document.querySelectorAll("input[name='mode']")[1];
+document.addEventListener("keydown", (e) => {
+  if (e.key == "ArrowLeft") single.checked = true;
+  if (e.key == "ArrowRight") multi.checked = true;
+});
+document.addEventListener("keydown", (e) => {
+  if (gameMode.classList.contains("show")) if (e.key == "Enter") chooseMode();
+});
 //* Start
 //Move to the choice modal after clicking start button
 startGameBtn.addEventListener("click", startGameFunction);
 player1NameInput.addEventListener("keydown", function (e) {
-  if (this.value.length > 0) if (e.key == "Enter") player2NameInput.focus();
+  if (e.key == "Enter")
+    if (this.value.length > 0)
+      secondInputExistence ? player2NameInput.focus() : startGameFunction();
 });
 player2NameInput.addEventListener("keydown", (e) => {
   if (e.key == "Enter") startGameFunction();
@@ -255,11 +300,19 @@ choice.addEventListener("click", (e) => {
 const xMark = document.querySelectorAll("input[name='choice']")[0];
 const oMark = document.querySelectorAll("input[name='choice']")[1];
 document.addEventListener("keydown", (e) => {
-  if (e.key == "x") xMark.checked = true;
-  if (e.key == "o") oMark.checked = true;
+  if (choice.classList.contains("show")) {
+    if (e.key == "x") xMark.checked = true;
+    if (e.key == "o") oMark.checked = true;
+  }
 });
 document.addEventListener("keydown", (e) => {
-  if (e.key == "Enter") choose();
+  if (choice.classList.contains("show"))
+    if (e.key == "Enter") {
+      //To blur from the inputs so that when i click x/o it doesn't get added
+      player1NameInput.blur();
+      player2NameInput.blur();
+      choose();
+    }
 });
 
 //* Winning
@@ -295,3 +348,13 @@ newGameBtn.addEventListener("click", () => {
   reset();
   mainFunction();
 });
+
+function switchToCPU() {
+  const ev = new Event("click");
+  //get a random square
+  const randomSquare = squares[Math.floor(Math.random() * squares.length)];
+  squares.forEach((square) => {
+    square.addEventListener("click", placeMark);
+  });
+  randomSquare.dispatchEvent(ev);
+}

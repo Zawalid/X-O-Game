@@ -49,7 +49,7 @@ let activePlayer = 0;
 //Winner
 let winnerPlayer;
 //To follow the squares that have been already clicked
-let alreadyClicked = [];
+// let alreadyClicked = [];
 // line in the win case
 let line;
 //Random square for cpu mode
@@ -151,8 +151,9 @@ function placeMark() {
   //Check if the currentMark is true or false
   this.firstElementChild.classList.add(currentMark);
   //Remove the event to make sure that every element get only one click event
-  alreadyClicked.push(this);
-  this.removeEventListener("click", placeMark);
+  //! No need for all of this just {once : true} does the job
+  // alreadyClicked.push(this);
+  // this.removeEventListener("click", placeMark);
   //Change the currentMark
   activePlayer = activePlayer == 0 ? 1 : 0;
   //Set the active player class
@@ -203,7 +204,7 @@ function placeMark() {
 function mainFunction() {
   choice.classList.remove("show");
   squares.forEach((square) => {
-    square.addEventListener("click", placeMark);
+    square.addEventListener("click", placeMark, { once: true });
   });
   //Set the names and marks
   player1NameField.textContent = player1.name;
@@ -242,7 +243,11 @@ function reset() {
 //* Remove Marks and Restore Events
 function removeMarksAndRestoreEvents() {
   //Restore the event on the elements
-  alreadyClicked.forEach((e) => e.addEventListener("click", placeMark));
+  // alreadyClicked.forEach((e) => e.addEventListener("click", placeMark));
+  //Restore the event on the elements
+  squares.forEach((square) => {
+    square.addEventListener("click", placeMark, { once: true });
+  });
   //remove the classes from all squares = remove marks
   squares.forEach((square) => {
     square.firstElementChild.classList.remove("x", "o");

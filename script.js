@@ -56,6 +56,12 @@ let line;
 let randomSquare;
 //To control when the automatic placement work
 let shouldContinue = true;
+//Trace player 1 moves
+let player1Moves = [];
+let possibs = [];
+let possib;
+let theSquare;
+let winMoves;
 
 //Get every individual square
 const square1 = document.querySelector(".one");
@@ -129,9 +135,6 @@ function chosenMode(mode) {
     ? secondInputParent.firstElementChild.removeChild(secondInput)
     : secondInputParent.firstElementChild.appendChild(secondInput);
   secondInputExistence = secondInputParent.querySelector(".cpu_case");
-  c(secondInputExistence);
-  c(single.checked);
-  c(multi.checked);
   //Set the opposite mode in the switch button based on the selected one
   currentModeField.innerHTML = "";
   mode == "single"
@@ -154,6 +157,9 @@ function placeMark() {
   //! No need for all of this just {once : true} does the job
   // alreadyClicked.push(this);
   // this.removeEventListener("click", placeMark);
+  //Trace the player1Moves
+  if (activePlayer == 0) player1Moves.push(this);
+
   //Change the currentMark
   activePlayer = activePlayer == 0 ? 1 : 0;
   //Set the active player class
@@ -253,8 +259,10 @@ function removeMarksAndRestoreEvents() {
     square.firstElementChild.classList.remove("x", "o");
   });
   //Remove line
-  line.classList.remove("win");
-  line.style.opacity = "0";
+  if (line) {
+    line.classList.remove("win");
+    line.style.opacity = "0";
+  }
 }
 //* Set Scores
 function setScores() {
@@ -301,14 +309,48 @@ function choose() {
 //* Single Mode (CPU)
 function switchToCPU() {
   if (!shouldContinue || number == 9) return;
+  check();
+  function check() {
+    let lastSquare = player1Moves.length - 1;
+    let preLastSquare = player1Moves.length - 2;
+    winMoves = [player1Moves[lastSquare], player1Moves[preLastSquare]];
+    for (let i = 0; i < player1Moves.length; i++) {
+      lastSquare--;
+      preLastSquare--;
+    }
+    for (const poss in possibilities) {
+      const posses = possibilities[poss][1];
+      possibs.push(posses);
+    }
+    possib = new Set(
+      possibs
+        .filter((poss) => {
+          return winMoves.every((move) => poss.includes(move));
+        })
+        .flat()
+    );
+    theSquare = new Set([...possib].filter((el) => !winMoves.includes(el)));
+  }
+  c(theSquare);
+  c(possib);
+  c(player1Moves);
+  c(winMoves);
   const ev = new Event("click");
+  // if (possib.size == 0) {
   do {
-    randomSquare = squares[Math.floor(Math.random() * squares.length)];
+    randomSquare =
+      possib.size == 0 ||
+      [...theSquare][0].firstElementChild.classList.contains("x") ||
+      [...theSquare][0].firstElementChild.classList.contains("x")
+        ? squares[Math.floor(Math.random() * squares.length)]
+        : [...theSquare][0];
   } while (
     randomSquare.firstElementChild.classList.contains("x") ||
     randomSquare.firstElementChild.classList.contains("o")
   );
-
+  // } else {
+  //   randomSquare = [...theSquare][0];
+  // }
   randomSquare.dispatchEvent(ev);
 }
 //* Switch Modes
@@ -386,6 +428,8 @@ winMsg.addEventListener("click", (e) => {
         setTimeout(switchToCPU, 700);
       }
     }
+    //Reset single the mode values
+    player1Moves = winMoves = theSquare =  [];
 
     //Increment the round number and set it
     currentRound++;
